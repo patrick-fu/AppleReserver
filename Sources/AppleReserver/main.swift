@@ -72,6 +72,9 @@ struct Monitor: ParsableCommand {
     @Option(name: .shortAndLong, parsing: .upToNextOption, help: "Part numbers, eg: MLTE3CH/A")
     var partNumbers: [String]
 
+    @Option(name: .shortAndLong, help: "WeCom (WXWork) robot webhook URL, eg: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxxx")
+    var webhook: String = ""
+
     func run() throws {
         Monitor.repeater = .every(.seconds(Double(interval))) { _ in
             firstly {
@@ -82,7 +85,11 @@ struct Monitor: ParsableCommand {
                     print("\u{1B}[1A\u{1B}[KChecked for \(Monitor.count) times.")
                 } else {
                     results.forEach { (store: String, part: String) in
-                        print("⚠️ \(Date())\t\(store)\t\(part) 有货啦！！！\n")
+                        let message = "⚠️ \(Date())\t\(store)\t\(part) ！！！\n"
+                        print(message)
+                        if (!webhook.isEmpty) {
+                            Request.reportWecom(webhook: webhook, content: message)
+                        }
                     }
                 }
             }.catch { error in

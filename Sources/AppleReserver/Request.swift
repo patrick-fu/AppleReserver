@@ -10,6 +10,14 @@ import Alamofire
 import PromiseKit
 
 struct Request {
+    static func reportWecom(webhook: String, content: String) {
+        let params: [String: Any] = [ "msgtype": "text", "text": [ "content": content ] ]
+        AF.request(URL(string: webhook)!, method: .post, parameters: params, encoding: JSONEncoding.default)
+            .response(completionHandler: { (response) in
+                return
+            })
+    }
+
     static func fetchStores(region: String) -> Promise<[Store]> {
         Promise { seal in
             AF.request(AppleURL.stores(of: region)).responseJSON { (response) in
